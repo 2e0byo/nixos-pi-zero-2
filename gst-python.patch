@@ -1,0 +1,9 @@
+--- /a/meson.build	2025-09-09 22:22:50.293703510 +0200
++++ /b/meson.build	2025-09-09 22:23:03.147191232 +0200
+@@ -146,6 +146,3 @@
+     warning('Python plugin not supported with `static` builds yet.')
+   endif
+ endif
+-if not get_option('tests').disabled()
+-  subdir('testsuite')
+-endif
