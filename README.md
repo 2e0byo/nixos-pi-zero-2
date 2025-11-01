@@ -1,3 +1,10 @@
+# Credits
+
+This is effectively a fork of
+[plmercereau/nixos-pi-zero-2](https://github.com/plmercereau/nixos-pi-zero-2),
+which did all the hard work. It doesn't show up as such since I started work in
+a direct clone before pushing, but the commits show correct authorship.
+
 # Building a NixOS SD image for a Raspberry Pi Zero 2 w
 
 1. Update `zero2w.nix`
