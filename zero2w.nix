@@ -33,24 +33,54 @@
     (final: prev: {
       python3Packages = prev.python3Packages.overrideScope (python-final: python-prev: {
         tidalapi = python-prev.tidalapi.overrideAttrs (attrs: rec {
-          version = "0.8.6";
+          version = "0.8.10";
           src = prev.fetchFromGitHub {
             owner = "EbbLabs";
             repo = "python-tidal";
             tag = "v${version}";
-            hash = "sha256-SsyO0bh2ayHfGzINBW1BTTPS/ICvIymIhQ1HUPRFOwU=";
+            hash = "sha256-hqtTe/KIGds01udMKoH5xXnoEe17FuOXLvWtp1yvJ2c=";
           };
         });
       });
-      mopidy-tidal = prev.mopidy-tidal.overrideAttrs (_: rec {
+
+      mopidy-tidal = pkgs.python3Packages.buildPythonApplication rec {
         pname = "latest-mopidy-tidal";
-        version = "0.3.11";
+        version = "0.3.12";
+        pyproject = true;
+
         src = prev.fetchFromGitHub {
-          owner = "EbbLabs";
+          owner = "2e0byo";
           repo = "mopidy-tidal";
-          rev = "v${version}";
-          hash = "sha256-wqx/30UQVm1fEwP/bZeW7TtzGfn/wI0klQnFr9E3AOs=";
+          rev = "feat/proxy";
+          hash = "sha256-06UilqKFP8Oygl9H4E/9e4mMiA7qncuq2IsLev/EY9k=";
         };
+
+        # used even though we're not using poetry
+        build-system = [pkgs.python3Packages.poetry-core];
+
+        nativeCheckInputs = with pkgs.python3Packages; [
+          pytestCheckHook
+          pytest-asyncio
+          pytest-cov # since default pytest invocation includes --cov
+          pytest-mock
+          pytest-httpserver
+          pytest-cases
+          trustme
+          httpx
+        ];
+        doCheck = false; # currently hangs
+
+        dependencies = [
+          pkgs.mopidy
+          pkgs.python3Packages.tidalapi
+        ];
+      };
+
+      mopidy = prev.mopidy.overrideAttrs (old: {
+        nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ pkgs.makeWrapper ];
+        postInstall = (old.postInstall or "") + ''
+          wrapProgram $out/bin/mopidy --set GST_PLUGIN_FEATURE_RANK curlhttpsrc:MAX
+        '';
       });
     })
 
@@ -217,7 +247,7 @@
         base_dir = "/var/lib/mopidy/Library";
       };
       tidal.quality = "LOSSLESS";
-      tidal.auth_method = "PKCE";
+      tidal.auth_method = "OAUTH";
       http.hostname = "0.0.0.0";
     };
   };
